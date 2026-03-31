@@ -50,10 +50,95 @@ themeOptions.forEach(option => {
     });
 });
 
-// Load saved theme
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
-    document.body.setAttribute('data-theme', savedTheme);
+// UI Style Management
+const uiToggle = document.getElementById('uiToggle');
+const uiModal = document.getElementById('uiModal');
+const uiOptions = document.querySelectorAll('.ui-style-option');
+
+uiToggle.addEventListener('click', () => {
+    uiModal.classList.add('active');
+});
+
+uiOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        const uiStyle = option.dataset.ui;
+        document.body.setAttribute('data-ui', uiStyle);
+        localStorage.setItem('uiStyle', uiStyle);
+        closeModal('uiModal');
+    });
+});
+
+// Load saved theme and UI style
+const savedTheme = localStorage.getItem('theme') || 'japanese';
+const savedUI = localStorage.getItem('uiStyle') || 'japanese';
+document.body.setAttribute('data-theme', savedTheme);
+document.body.setAttribute('data-ui', savedUI);
+
+// Language Management
+const langToggle = document.getElementById('langToggle');
+const langModal = document.getElementById('langModal');
+const langOptions = document.querySelectorAll('.lang-option');
+
+langToggle.addEventListener('click', () => {
+    langModal.classList.add('active');
+});
+
+langOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        const lang = option.dataset.lang;
+        setLanguage(lang);
+        closeModal('langModal');
+        updateDynamicContent();
+    });
+});
+
+// Update dynamic content based on language
+function updateDynamicContent() {
+    // Update navigation
+    document.querySelectorAll('.nav-link').forEach((link, index) => {
+        const keys = ['home', 'products', 'myProfile'];
+        link.textContent = t(keys[index]);
+    });
+    
+    // Update buttons
+    document.getElementById('loginBtn').textContent = t('login');
+    document.getElementById('registerBtn').textContent = t('register');
+    document.getElementById('logoutBtn').textContent = t('logout');
+    
+    // Update hero
+    const heroTitle = document.getElementById('heroTitle');
+    const heroSubtitle = document.getElementById('heroSubtitle');
+    if (heroTitle) heroTitle.textContent = t('heroTitle');
+    if (heroSubtitle) heroSubtitle.textContent = t('heroSubtitle');
+    
+    // Update search placeholder
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = t('searchPlaceholder');
+    
+    // Update buttons text
+    const searchBtn = document.getElementById('searchBtn');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    if (searchBtn) searchBtn.textContent = t('search');
+    if (clearSearchBtn) clearSearchBtn.textContent = t('clear');
+    
+    // Update page headers
+    const pageHeaders = document.querySelectorAll('.page-header h1');
+    pageHeaders.forEach(header => {
+        if (header.textContent.includes('Tất cả') || header.textContent.includes('All') || header.textContent.includes('Todos') || header.textContent.includes('すべて')) {
+            header.textContent = t('allProducts');
+        }
+    });
+    
+    // Reload current page content
+    const currentPage = document.querySelector('.page:not([style*="display: none"])');
+    if (currentPage) {
+        const pageId = currentPage.id.replace('Page', '');
+        if (pageId === 'home') {
+            loadHomePage();
+        } else if (pageId === 'profile' && currentUser) {
+            loadProfilePage();
+        }
+    }
 }
 
 // Modal Management
@@ -77,8 +162,9 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
     const user = db.users.find(u => u.email === email && u.password === password);
     if (user) {
         currentUser = user;
-        updateUI();
         closeModal('loginModal');
+        e.target.reset();
+        updateUI();
         alert('Đăng nhập thành công!');
     } else {
         alert('Email hoặc mật khẩu không đúng!');
@@ -108,8 +194,9 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
     db.users.push(newUser);
     saveData();
     currentUser = newUser;
-    updateUI();
     closeModal('registerModal');
+    e.target.reset();
+    updateUI();
     alert('Đăng ký thành công!');
 });
 
@@ -164,8 +251,6 @@ function showPage(page) {
     
     if (page === 'products') {
         renderProducts();
-    } else if (page === 'my-products') {
-        renderMyProducts();
     } else if (page === 'home') {
         loadHomePage();
     } else if (page === 'profile') {
@@ -295,17 +380,27 @@ document.getElementById('clearSearchBtn').addEventListener('click', () => {
 
 function renderMyProducts() {
     const grid = document.getElementById('myProductsGrid');
+    const noProductsMessage = document.getElementById('noProductsMessage');
     grid.innerHTML = '';
     
     if (!currentUser) {
-        grid.innerHTML = '<p>Vui lòng đăng nhập để xem sản phẩm của bạn</p>';
+        noProductsMessage.style.display = 'block';
+        grid.style.display = 'none';
         return;
     }
     
     const myProducts = db.products.filter(p => p.sellerId === currentUser.id);
-    myProducts.forEach(product => {
-        grid.appendChild(createProductCard(product, true));
-    });
+    
+    if (myProducts.length === 0) {
+        noProductsMessage.style.display = 'block';
+        grid.style.display = 'none';
+    } else {
+        noProductsMessage.style.display = 'none';
+        grid.style.display = 'grid';
+        myProducts.forEach(product => {
+            grid.appendChild(createProductCard(product, true));
+        });
+    }
 }
 
 function renderFeaturedProducts() {
@@ -570,6 +665,7 @@ function deleteProduct(productId) {
         db.products = db.products.filter(p => p.id !== productId);
         saveData();
         renderMyProducts();
+        loadProfilePage(); // Refresh stats
     }
 }
 
@@ -619,6 +715,9 @@ function loadProfilePage() {
         month: '2-digit', 
         year: 'numeric' 
     });
+    
+    // Load my products
+    renderMyProducts();
 }
 
 // Avatar Upload
