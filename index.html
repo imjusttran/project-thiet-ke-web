@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chợ Online - Marketplace</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">Chợ Online</div>
+            <nav class="nav">
+                <a href="#" class="nav-link" data-page="home">Trang chủ</a>
+                <a href="#" class="nav-link" data-page="products">Sản phẩm</a>
+                <a href="#" class="nav-link" data-page="my-products">Sản phẩm của tôi</a>
+                <a href="#" class="nav-link" data-page="profile">Của tôi</a>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle">🎨</button>
+                <button class="btn-primary" id="loginBtn">Đăng nhập</button>
+                <button class="btn-secondary" id="registerBtn">Đăng ký</button>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <span id="userName"></span>
+                    <button class="btn-secondary" id="logoutBtn">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Theme Selector Modal -->
+    <div class="modal" id="themeModal">
+        <div class="modal-content">
+            <h2>Chọn Theme</h2>
+            <div class="theme-grid">
+                <div class="theme-option" data-theme="green">
+                    <div class="theme-preview">
+                        <div style="background: #A4CD01"></div>
+                        <div style="background: #E0D205"></div>
+                        <div style="background: #02754B"></div>
+                    </div>
+                    <p>Xanh Tươi</p>
+                </div>
+                <div class="theme-option" data-theme="dark">
+                    <div class="theme-preview">
+                        <div style="background: #474747"></div>
+                        <div style="background: #333333"></div>
+                        <div style="background: #FD105E"></div>
+                    </div>
+                    <p>Tối Hiện Đại</p>
+                </div>
+                <div class="theme-option" data-theme="purple">
+                    <div class="theme-preview">
+                        <div style="background: #EAEFFE"></div>
+                        <div style="background: #9787F3"></div>
+                        <div style="background: #2D274B"></div>
+                    </div>
+                    <p>Tím Nhẹ Nhàng</p>
+                </div>
+                <div class="theme-option" data-theme="pastel">
+                    <div class="theme-preview">
+                        <div style="background: #F6F3ED"></div>
+                        <div style="background: #C2CBD3"></div>
+                        <div style="background: #E281B1"></div>
+                    </div>
+                    <p>Pastel Dịu</p>
+                </div>
+                <div class="theme-option" data-theme="warm">
+                    <div class="theme-preview">
+                        <div style="background: #F8DCD3"></div>
+                        <div style="background: #82AAF2"></div>
+                        <div style="background: #FB8A4C"></div>
+                    </div>
+                    <p>Ấm Áp</p>
+                </div>
+            </div>
+            <button class="btn-secondary" onclick="closeModal('themeModal')">Đóng</button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2>Đăng nhập</h2>
+            <form id="loginForm">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Mật khẩu" required>
+                <button type="submit" class="btn-primary">Đăng nhập</button>
+            </form>
+            <button class="btn-secondary" onclick="closeModal('loginModal')">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <h2>Đăng ký</h2>
+            <form id="registerForm">
+                <input type="text" placeholder="Tên đầy đủ" required>
+                <input type="email" placeholder="Email" required>
+                <input type="tel" placeholder="Số điện thoại" required>
+                <input type="password" placeholder="Mật khẩu" required>
+                <button type="submit" class="btn-primary">Đăng ký</button>
+            </form>
+            <button class="btn-secondary" onclick="closeModal('registerModal')">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal" id="addProductModal">
+        <div class="modal-content">
+            <h2>Đăng sản phẩm mới</h2>
+            <form id="addProductForm">
+                <input type="text" placeholder="Tên sản phẩm" required>
+                <textarea placeholder="Mô tả sản phẩm" rows="4" required></textarea>
+                <input type="number" placeholder="Giá (VNĐ)" required>
+                <input type="text" placeholder="Danh mục" required>
+                <input type="text" placeholder="Thông tin liên hệ" required>
+                <div class="image-upload">
+                    <label>Hình ảnh sản phẩm (tối đa 5)</label>
+                    <input type="file" accept="image/*" multiple id="productImages">
+                    <div id="imagePreview"></div>
+                </div>
+                <button type="submit" class="btn-primary">Đăng sản phẩm</button>
+            </form>
+            <button class="btn-secondary" onclick="closeModal('addProductModal')">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="modal" id="chatModal">
+        <div class="modal-content chat-container">
+            <div class="chat-header">
+                <h3 id="chatTitle">Chat với người bán</h3>
+                <button onclick="closeModal('chatModal')">✕</button>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Nhập tin nhắn...">
+                <button class="btn-primary" id="sendMessage">Gửi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Home Page -->
+        <div class="page" id="homePage">
+            <div class="hero">
+                <h1 id="heroTitle">Chào mừng đến Chợ Online</h1>
+                <p id="heroSubtitle">Nơi mua bán dễ dàng, an toàn và tiện lợi</p>
+            </div>
+            
+            <div class="home-content">
+                <!-- About Section -->
+                <div class="home-section">
+                    <h2>Giới thiệu</h2>
+                    <div id="aboutContent" class="editable-content">
+                        <p>Chợ Online là nền tảng mua bán trực tuyến hiện đại, kết nối người mua và người bán một cách nhanh chóng và tiện lợi.</p>
+                        <p>Với giao diện thân thiện và dễ sử dụng, bạn có thể dễ dàng đăng bán sản phẩm hoặc tìm kiếm những món đồ yêu thích.</p>
+                    </div>
+                    <button class="btn-secondary edit-btn" id="editAboutBtn" style="display: none;">Chỉnh sửa</button>
+                </div>
+
+                <!-- Contact Section -->
+                <div class="home-section">
+                    <h2>Thông tin liên hệ</h2>
+                    <div id="contactContent" class="contact-info">
+                        <div class="contact-item">
+                            <span class="contact-label">📧 Email:</span>
+                            <span id="contactEmail">contact@choonline.vn</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">📱 Điện thoại:</span>
+                            <span id="contactPhone">0123 456 789</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">📍 Địa chỉ:</span>
+                            <span id="contactAddress">Hà Nội, Việt Nam</span>
+                        </div>
+                    </div>
+                    <button class="btn-secondary edit-btn" id="editContactBtn" style="display: none;">Chỉnh sửa</button>
+                </div>
+
+                <!-- Features -->
+                <div class="home-section">
+                    <h2>Tính năng nổi bật</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🛍️</div>
+                            <h3>Đăng bán dễ dàng</h3>
+                            <p>Đăng sản phẩm chỉ trong vài phút với nhiều hình ảnh</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">💬</div>
+                            <h3>Chat trực tiếp</h3>
+                            <p>Liên hệ người bán ngay lập tức qua chat</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎨</div>
+                            <h3>Giao diện đẹp</h3>
+                            <p>Nhiều theme màu sắc, responsive mọi thiết bị</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔒</div>
+                            <h3>An toàn</h3>
+                            <p>Thông tin được bảo mật và lưu trữ an toàn</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Page -->
+        <div class="page" id="productsPage" style="display: none;">
+            <div class="page-header">
+                <h1>Tất cả sản phẩm</h1>
+                <button class="btn-primary" id="addProductBtn" style="display: none;">+ Đăng sản phẩm</button>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm sản phẩm theo tên, mô tả, danh mục...">
+                <button class="btn-primary" id="searchBtn">Tìm kiếm</button>
+                <button class="btn-secondary" id="clearSearchBtn">Xóa</button>
+            </div>
+            
+            <div class="products-grid" id="productsGrid"></div>
+            <div id="noResults" style="display: none; text-align: center; padding: 3rem; font-size: 1.2rem; color: var(--color-text-light);">
+                Không tìm thấy sản phẩm nào 😔
+            </div>
+        </div>
+
+        <!-- My Products Page -->
+        <div class="page" id="myProductsPage" style="display: none;">
+            <div class="page-header">
+                <h1>Sản phẩm của tôi</h1>
+                <button class="btn-primary" id="addProductBtn2">+ Đăng sản phẩm</button>
+            </div>
+            <div class="products-grid" id="myProductsGrid"></div>
+        </div>
+
+        <!-- Profile Page -->
+        <div class="page" id="profilePage" style="display: none;">
+            <div class="profile-container">
+                <h1 class="page-title">Thông tin tài khoản</h1>
+                
+                <div class="profile-content">
+                    <!-- Avatar Section -->
+                    <div class="profile-section">
+                        <h2>Ảnh đại diện</h2>
+                        <div class="avatar-section">
+                            <div class="avatar-display" id="avatarDisplay">
+                                <span id="avatarInitials">?</span>
+                                <img id="avatarImage" style="display: none;">
+                            </div>
+                            <div class="avatar-actions">
+                                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                                <button class="btn-primary" onclick="document.getElementById('avatarInput').click()">Chọn ảnh</button>
+                                <button class="btn-secondary" id="removeAvatar">Xóa ảnh</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Info Section -->
+                    <div class="profile-section">
+                        <h2>Thông tin cá nhân</h2>
+                        <form id="profileForm">
+                            <div class="form-group">
+                                <label>Tên đầy đủ</label>
+                                <input type="text" id="profileName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="profileEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Số điện thoại</label>
+                                <input type="tel" id="profilePhone" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Cập nhật thông tin</button>
+                        </form>
+                    </div>
+
+                    <!-- Password Section -->
+                    <div class="profile-section">
+                        <h2>Đổi mật khẩu</h2>
+                        <form id="passwordForm">
+                            <div class="form-group">
+                                <label>Mật khẩu hiện tại</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Mật khẩu mới</label>
+                                <input type="password" id="newPassword" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label>Xác nhận mật khẩu mới</label>
+                                <input type="password" id="confirmPassword" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn-primary">Đổi mật khẩu</button>
+                        </form>
+                    </div>
+
+                    <!-- Account Stats -->
+                    <div class="profile-section">
+                        <h2>Thống kê</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalProducts">0</div>
+                                <div class="stat-label">Sản phẩm đã đăng</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalChats">0</div>
+                                <div class="stat-label">Cuộc trò chuyện</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="memberSince">-</div>
+                                <div class="stat-label">Thành viên từ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit About Modal -->
+    <div class="modal" id="editAboutModal">
+        <div class="modal-content">
+            <h2>Chỉnh sửa giới thiệu</h2>
+            <form id="editAboutForm">
+                <textarea id="aboutTextarea" rows="6" placeholder="Nhập nội dung giới thiệu..."></textarea>
+                <button type="submit" class="btn-primary">Lưu thay đổi</button>
+            </form>
+            <button class="btn-secondary" onclick="closeModal('editAboutModal')">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Edit Contact Modal -->
+    <div class="modal" id="editContactModal">
+        <div class="modal-content">
+            <h2>Chỉnh sửa thông tin liên hệ</h2>
+            <form id="editContactForm">
+                <input type="email" id="contactEmailInput" placeholder="Email" required>
+                <input type="tel" id="contactPhoneInput" placeholder="Số điện thoại" required>
+                <input type="text" id="contactAddressInput" placeholder="Địa chỉ" required>
+                <button type="submit" class="btn-primary">Lưu thay đổi</button>
+            </form>
+            <button class="btn-secondary" onclick="closeModal('editContactModal')">Hủy</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
