@@ -3,6 +3,7 @@ let db = {
     users: [],
     products: [],
     chats: [],
+    cart: [], // Shopping cart
     siteSettings: {
         ownerEmail: 'owner@example.com', // Email của owner
         aboutText: 'Chợ Online là nền tảng mua bán trực tuyến hiện đại, kết nối người mua và người bán một cách nhanh chóng và tiện lợi.\n\nVới giao diện thân thiện và dễ sử dụng, bạn có thể dễ dàng đăng bán sản phẩm hoặc tìm kiếm những món đồ yêu thích.',
@@ -21,6 +22,10 @@ function loadData() {
     const saved = localStorage.getItem('marketplaceDB');
     if (saved) {
         db = JSON.parse(saved);
+        // Đảm bảo cart array tồn tại
+        if (!db.cart) {
+            db.cart = [];
+        }
     }
 }
 
@@ -53,6 +58,169 @@ themeOptions.forEach(option => {
 // Load saved theme
 const savedTheme = localStorage.getItem('theme') || 'summer';
 document.body.setAttribute('data-theme', savedTheme);
+
+// Cart Management
+const cartToggle = document.getElementById('cartToggle');
+const cartModal = document.getElementById('cartModal');
+const cartBadge = document.getElementById('cartBadge');
+
+cartToggle.addEventListener('click', () => {
+    openModal('cartModal');
+    renderCart();
+});
+
+function updateCartBadge() {
+    if (!cartBadge) return; // Kiểm tra nếu element chưa tồn tại
+    if (!db.cart) db.cart = []; // Đảm bảo cart array tồn tại
+    
+    const totalItems = db.cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (totalItems > 0) {
+        cartBadge.textContent = totalItems;
+        cartBadge.style.display = 'flex';
+    } else {
+        cartBadge.style.display = 'none';
+    }
+}
+
+function addToCart(productId) {
+    if (!currentUser) {
+        alert(t('pleaseLogin'));
+        return;
+    }
+    
+    const product = db.products.find(p => p.id === productId);
+    if (!product) return;
+    
+    // Không cho phép thêm sản phẩm của chính mình vào giỏ
+    if (product.sellerId === currentUser.id) {
+        alert('Bạn không thể mua sản phẩm của chính mình!');
+        return;
+    }
+    
+    const existingItem = db.cart.find(item => item.productId === productId && item.userId === currentUser.id);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        db.cart.push({
+            id: Date.now(),
+            userId: currentUser.id,
+            productId: productId,
+            quantity: 1
+        });
+    }
+    
+    saveData();
+    updateCartBadge();
+    alert(t('addedToCart'));
+}
+
+function removeFromCart(cartItemId) {
+    db.cart = db.cart.filter(item => item.id !== cartItemId);
+    saveData();
+    updateCartBadge();
+    renderCart();
+}
+
+function updateCartQuantity(cartItemId, change) {
+    const item = db.cart.find(i => i.id === cartItemId);
+    if (!item) return;
+    
+    item.quantity += change;
+    
+    if (item.quantity <= 0) {
+        removeFromCart(cartItemId);
+    } else {
+        saveData();
+        renderCart();
+    }
+}
+
+function renderCart() {
+    const cartItems = document.getElementById('cartItems');
+    const cartTotal = document.getElementById('cartTotal');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    
+    if (!currentUser) {
+        cartItems.innerHTML = `
+            <div class="cart-empty-message">
+                <p>🛒</p>
+                <p>${t('pleaseLogin')}</p>
+            </div>
+        `;
+        cartTotal.textContent = '0 ₫';
+        checkoutBtn.disabled = true;
+        return;
+    }
+    
+    const userCartItems = db.cart.filter(item => item.userId === currentUser.id);
+    
+    if (userCartItems.length === 0) {
+        cartItems.innerHTML = `
+            <div class="cart-empty-message">
+                <p>🛒</p>
+                <p>${t('cartEmptyMessage')}</p>
+            </div>
+        `;
+        cartTotal.textContent = '0 ₫';
+        checkoutBtn.disabled = true;
+        return;
+    }
+    
+    let total = 0;
+    cartItems.innerHTML = '';
+    
+    userCartItems.forEach(item => {
+        const product = db.products.find(p => p.id === item.productId);
+        if (!product) return;
+        
+        const itemTotal = product.price * item.quantity;
+        total += itemTotal;
+        
+        const cartItemDiv = document.createElement('div');
+        cartItemDiv.className = 'cart-item';
+        cartItemDiv.innerHTML = `
+            <img src="${product.images[0]}" alt="${product.title}" class="cart-item-image">
+            <div class="cart-item-info">
+                <div class="cart-item-title">${product.title}</div>
+                <div class="cart-item-price">${formatPrice(product.price)}</div>
+                <div class="cart-item-quantity">
+                    <button onclick="updateCartQuantity(${item.id}, -1)">−</button>
+                    <span>${item.quantity}</span>
+                    <button onclick="updateCartQuantity(${item.id}, 1)">+</button>
+                </div>
+            </div>
+            <button class="cart-item-remove" onclick="removeFromCart(${item.id})">${t('removeFromCart')}</button>
+        `;
+        cartItems.appendChild(cartItemDiv);
+    });
+    
+    cartTotal.textContent = formatPrice(total);
+    checkoutBtn.disabled = false;
+}
+
+document.getElementById('checkoutBtn').addEventListener('click', () => {
+    if (!currentUser) {
+        alert(t('pleaseLogin'));
+        return;
+    }
+    
+    const userCartItems = db.cart.filter(item => item.userId === currentUser.id);
+    
+    if (userCartItems.length === 0) {
+        alert(t('cartEmpty'));
+        return;
+    }
+    
+    // Xóa giỏ hàng sau khi thanh toán
+    db.cart = db.cart.filter(item => item.userId !== currentUser.id);
+    saveData();
+    updateCartBadge();
+    renderCart();
+    
+    alert(t('checkoutSuccess'));
+    closeModal('cartModal');
+});
 
 // Language Management
 const langToggle = document.getElementById('langToggle');
@@ -142,12 +310,12 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
     const user = db.users.find(u => u.email === email && u.password === password);
     if (user) {
         currentUser = user;
-        closeModal('loginModal');
         e.target.reset();
         updateUI();
-        alert('Đăng nhập thành công!');
+        closeModal('loginModal');
+        alert(t('loginSuccess'));
     } else {
-        alert('Email hoặc mật khẩu không đúng!');
+        alert(t('loginError'));
     }
 });
 
@@ -159,7 +327,7 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
     const password = e.target[3].value;
     
     if (db.users.find(u => u.email === email)) {
-        alert('Email đã được sử dụng!');
+        alert(t('emailUsed'));
         return;
     }
     
@@ -168,16 +336,17 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
         name,
         email,
         phone,
-        password
+        password,
+        createdAt: new Date().toISOString()
     };
     
     db.users.push(newUser);
     saveData();
     currentUser = newUser;
-    closeModal('registerModal');
     e.target.reset();
     updateUI();
-    alert('Đăng ký thành công!');
+    closeModal('registerModal');
+    alert(t('registerSuccess'));
 });
 
 document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -194,25 +363,30 @@ function updateUI() {
     const addProductBtn = document.getElementById('addProductBtn');
     
     if (currentUser) {
-        loginBtn.style.display = 'none';
-        registerBtn.style.display = 'none';
-        userMenu.style.display = 'flex';
-        userName.textContent = currentUser.name;
-        addProductBtn.style.display = 'block';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (registerBtn) registerBtn.style.display = 'none';
+        if (userMenu) userMenu.style.display = 'flex';
+        if (userName) userName.textContent = currentUser.name;
+        if (addProductBtn) addProductBtn.style.display = 'block';
         
         // Show edit buttons if user is owner
         const isOwner = currentUser.email === db.siteSettings.ownerEmail;
-        document.getElementById('editAboutBtn').style.display = isOwner ? 'block' : 'none';
-        document.getElementById('editContactBtn').style.display = isOwner ? 'block' : 'none';
+        const editAboutBtn = document.getElementById('editAboutBtn');
+        const editContactBtn = document.getElementById('editContactBtn');
+        if (editAboutBtn) editAboutBtn.style.display = isOwner ? 'block' : 'none';
+        if (editContactBtn) editContactBtn.style.display = isOwner ? 'block' : 'none';
     } else {
-        loginBtn.style.display = 'block';
-        registerBtn.style.display = 'block';
-        userMenu.style.display = 'none';
-        addProductBtn.style.display = 'none';
-        document.getElementById('editAboutBtn').style.display = 'none';
-        document.getElementById('editContactBtn').style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'block';
+        if (registerBtn) registerBtn.style.display = 'block';
+        if (userMenu) userMenu.style.display = 'none';
+        if (addProductBtn) addProductBtn.style.display = 'none';
+        const editAboutBtn = document.getElementById('editAboutBtn');
+        const editContactBtn = document.getElementById('editContactBtn');
+        if (editAboutBtn) editAboutBtn.style.display = 'none';
+        if (editContactBtn) editContactBtn.style.display = 'none';
     }
     
+    updateCartBadge();
     renderProducts();
 }
 
@@ -252,13 +426,16 @@ document.getElementById('addProductBtn').addEventListener('click', () => {
     openModal('addProductModal');
 });
 
-document.getElementById('addProductBtn2').addEventListener('click', () => {
-    if (!currentUser) {
-        alert('Vui lòng đăng nhập để đăng sản phẩm!');
-        return;
-    }
-    openModal('addProductModal');
-});
+const addProductBtn2 = document.getElementById('addProductBtn2');
+if (addProductBtn2) {
+    addProductBtn2.addEventListener('click', () => {
+        if (!currentUser) {
+            alert('Vui lòng đăng nhập để đăng sản phẩm!');
+            return;
+        }
+        openModal('addProductModal');
+    });
+}
 
 document.getElementById('productImages').addEventListener('change', (e) => {
     const preview = document.getElementById('imagePreview');
@@ -398,26 +575,37 @@ function renderFeaturedProducts() {
 function loadHomePage() {
     // Load about text
     const aboutContent = document.getElementById('aboutContent');
-    const paragraphs = db.siteSettings.aboutText.split('\n\n');
-    aboutContent.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+    if (aboutContent) {
+        const paragraphs = db.siteSettings.aboutText.split('\n\n');
+        aboutContent.innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+    }
     
     // Load contact info
-    document.getElementById('contactEmail').textContent = db.siteSettings.contactEmail;
-    document.getElementById('contactPhone').textContent = db.siteSettings.contactPhone;
-    document.getElementById('contactAddress').textContent = db.siteSettings.contactAddress;
+    const contactEmail = document.getElementById('contactEmail');
+    const contactPhone = document.getElementById('contactPhone');
+    const contactAddress = document.getElementById('contactAddress');
+    
+    if (contactEmail) contactEmail.textContent = db.siteSettings.contactEmail;
+    if (contactPhone) contactPhone.textContent = db.siteSettings.contactPhone;
+    if (contactAddress) contactAddress.textContent = db.siteSettings.contactAddress;
     
     // Show edit buttons if owner
     if (currentUser && currentUser.email === db.siteSettings.ownerEmail) {
-        document.getElementById('editAboutBtn').style.display = 'block';
-        document.getElementById('editContactBtn').style.display = 'block';
+        const editAboutBtn = document.getElementById('editAboutBtn');
+        const editContactBtn = document.getElementById('editContactBtn');
+        if (editAboutBtn) editAboutBtn.style.display = 'block';
+        if (editContactBtn) editContactBtn.style.display = 'block';
     }
 }
 
 // Edit About
-document.getElementById('editAboutBtn').addEventListener('click', () => {
-    document.getElementById('aboutTextarea').value = db.siteSettings.aboutText;
-    openModal('editAboutModal');
-});
+const editAboutBtn = document.getElementById('editAboutBtn');
+if (editAboutBtn) {
+    editAboutBtn.addEventListener('click', () => {
+        document.getElementById('aboutTextarea').value = db.siteSettings.aboutText;
+        openModal('editAboutModal');
+    });
+}
 
 document.getElementById('editAboutForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -429,12 +617,15 @@ document.getElementById('editAboutForm').addEventListener('submit', (e) => {
 });
 
 // Edit Contact
-document.getElementById('editContactBtn').addEventListener('click', () => {
-    document.getElementById('contactEmailInput').value = db.siteSettings.contactEmail;
-    document.getElementById('contactPhoneInput').value = db.siteSettings.contactPhone;
-    document.getElementById('contactAddressInput').value = db.siteSettings.contactAddress;
-    openModal('editContactModal');
-});
+const editContactBtn = document.getElementById('editContactBtn');
+if (editContactBtn) {
+    editContactBtn.addEventListener('click', () => {
+        document.getElementById('contactEmailInput').value = db.siteSettings.contactEmail;
+        document.getElementById('contactPhoneInput').value = db.siteSettings.contactPhone;
+        document.getElementById('contactAddressInput').value = db.siteSettings.contactAddress;
+        openModal('editContactModal');
+    });
+}
 
 document.getElementById('editContactForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -463,13 +654,14 @@ function createProductCard(product, isOwner = false) {
             <h3 class="product-title">${product.title}</h3>
             <p class="product-price">${formatPrice(product.price)}</p>
             <p class="product-description">${product.description}</p>
-            <p style="color: var(--color-text-light); font-size: 0.9rem;">Người bán: ${product.sellerName}</p>
+            <p style="color: var(--color-text-light); font-size: 0.9rem;">${t('seller')}: ${product.sellerName}</p>
             <div class="product-actions">
                 ${currentUser && !isProductOwner ? 
-                    `<button class="btn-primary" onclick="openChat(${product.id})">💬 Chat ngay</button>` : ''}
+                    `<button class="btn-primary" onclick="addToCart(${product.id})">${t('addToCart')}</button>
+                     <button class="btn-secondary" onclick="openChat(${product.id})">💬 ${t('chatNow')}</button>` : ''}
                 ${isProductOwner ? 
-                    `<button class="btn-primary" onclick="openChat(${product.id})">💬 Xem tin nhắn ${hasUnreadMessages ? '🔴' : ''}</button>
-                     <button class="btn-secondary" onclick="deleteProduct(${product.id})">Xóa</button>` : ''}
+                    `<button class="btn-primary" onclick="openChat(${product.id})">💬 ${t('viewMessages')} ${hasUnreadMessages ? '🔴' : ''}</button>
+                     <button class="btn-secondary" onclick="deleteProduct(${product.id})">${t('delete')}</button>` : ''}
             </div>
         </div>
     `;
@@ -652,6 +844,7 @@ function deleteProduct(productId) {
 // Initialize
 updateUI();
 loadHomePage();
+updateCartBadge(); // Initialize cart badge after all elements are loaded
 
 // Profile Page Functions
 function loadProfilePage() {
@@ -701,98 +894,110 @@ function loadProfilePage() {
 }
 
 // Avatar Upload
-document.getElementById('avatarInput').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        currentUser.avatar = e.target.result;
-        saveData();
-        loadProfilePage();
-        alert('Cập nhật ảnh đại diện thành công!');
-    };
-    reader.readAsDataURL(file);
-});
+const avatarInput = document.getElementById('avatarInput');
+if (avatarInput) {
+    avatarInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            currentUser.avatar = e.target.result;
+            saveData();
+            loadProfilePage();
+            alert('Cập nhật ảnh đại diện thành công!');
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
 // Remove Avatar
-document.getElementById('removeAvatar').addEventListener('click', () => {
-    if (confirm('Bạn có chắc muốn xóa ảnh đại diện?')) {
-        delete currentUser.avatar;
-        saveData();
-        loadProfilePage();
-        alert('Đã xóa ảnh đại diện!');
-    }
-});
+const removeAvatar = document.getElementById('removeAvatar');
+if (removeAvatar) {
+    removeAvatar.addEventListener('click', () => {
+        if (confirm('Bạn có chắc muốn xóa ảnh đại diện?')) {
+            delete currentUser.avatar;
+            saveData();
+            loadProfilePage();
+            alert('Đã xóa ảnh đại diện!');
+        }
+    });
+}
 
 // Update Profile Form
-document.getElementById('profileForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const name = document.getElementById('profileName').value;
-    const email = document.getElementById('profileEmail').value;
-    const phone = document.getElementById('profilePhone').value;
-    
-    // Check if email is already used by another user
-    const existingUser = db.users.find(u => u.email === email && u.id !== currentUser.id);
-    if (existingUser) {
-        alert('Email này đã được sử dụng bởi tài khoản khác!');
-        return;
-    }
-    
-    currentUser.name = name;
-    currentUser.email = email;
-    currentUser.phone = phone;
-    
-    // Update seller name in products
-    db.products.forEach(product => {
-        if (product.sellerId === currentUser.id) {
-            product.sellerName = name;
+const profileForm = document.getElementById('profileForm');
+if (profileForm) {
+    profileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('profileName').value;
+        const email = document.getElementById('profileEmail').value;
+        const phone = document.getElementById('profilePhone').value;
+        
+        // Check if email is already used by another user
+        const existingUser = db.users.find(u => u.email === email && u.id !== currentUser.id);
+        if (existingUser) {
+            alert('Email này đã được sử dụng bởi tài khoản khác!');
+            return;
         }
+        
+        currentUser.name = name;
+        currentUser.email = email;
+        currentUser.phone = phone;
+        
+        // Update seller name in products
+        db.products.forEach(product => {
+            if (product.sellerId === currentUser.id) {
+                product.sellerName = name;
+            }
+        });
+        
+        // Update sender name in chats
+        db.chats.forEach(chat => {
+            if (chat.senderId === currentUser.id) {
+                chat.senderName = name;
+            }
+        });
+        
+        saveData();
+        updateUI();
+        alert('Cập nhật thông tin thành công!');
     });
-    
-    // Update sender name in chats
-    db.chats.forEach(chat => {
-        if (chat.senderId === currentUser.id) {
-            chat.senderName = name;
-        }
-    });
-    
-    saveData();
-    updateUI();
-    alert('Cập nhật thông tin thành công!');
-});
+}
 
 // Change Password Form
-document.getElementById('passwordForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    
-    if (currentPassword !== currentUser.password) {
-        alert('Mật khẩu hiện tại không đúng!');
-        return;
-    }
-    
-    if (newPassword.length < 6) {
-        alert('Mật khẩu mới phải có ít nhất 6 ký tự!');
-        return;
-    }
-    
-    if (newPassword !== confirmPassword) {
-        alert('Mật khẩu xác nhận không khớp!');
-        return;
-    }
-    
-    currentUser.password = newPassword;
-    saveData();
-    
-    // Clear form
-    document.getElementById('currentPassword').value = '';
-    document.getElementById('newPassword').value = '';
-    document.getElementById('confirmPassword').value = '';
-    
-    alert('Đổi mật khẩu thành công!');
-});
+const passwordForm = document.getElementById('passwordForm');
+if (passwordForm) {
+    passwordForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (currentPassword !== currentUser.password) {
+            alert('Mật khẩu hiện tại không đúng!');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            alert('Mật khẩu mới phải có ít nhất 6 ký tự!');
+            return;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            alert('Mật khẩu xác nhận không khớp!');
+            return;
+        }
+        
+        currentUser.password = newPassword;
+        saveData();
+        
+        // Clear form
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        
+        alert('Đổi mật khẩu thành công!');
+    });
+}

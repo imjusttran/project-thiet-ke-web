@@ -21,6 +21,19 @@ const translations = {
         summerDesc: "Màu sắc ấm áp, tươi sáng",
         winterDesc: "Màu sắc mát mẻ, thanh lịch",
         
+        // Cart
+        cart: "Giỏ hàng",
+        addToCart: "Thêm vào giỏ",
+        removeFromCart: "Xóa khỏi giỏ",
+        cartEmpty: "Giỏ hàng trống",
+        total: "Tổng cộng",
+        checkout: "Thanh toán",
+        quantity: "Số lượng",
+        addedToCart: "Đã thêm vào giỏ hàng!",
+        removedFromCart: "Đã xóa khỏi giỏ hàng!",
+        checkoutSuccess: "Đặt hàng thành công! Người bán sẽ liên hệ với bạn sớm.",
+        cartEmptyMessage: "Giỏ hàng của bạn đang trống",
+        
         // Login/Register
         loginTitle: "Đăng nhập",
         registerTitle: "Đăng ký",
@@ -152,6 +165,19 @@ const translations = {
         winterTheme: "Winter",
         summerDesc: "Warm, bright colors",
         winterDesc: "Cool, elegant colors",
+        
+        // Cart
+        cart: "Cart",
+        addToCart: "Add to Cart",
+        removeFromCart: "Remove",
+        cartEmpty: "Cart is empty",
+        total: "Total",
+        checkout: "Checkout",
+        quantity: "Quantity",
+        addedToCart: "Added to cart!",
+        removedFromCart: "Removed from cart!",
+        checkoutSuccess: "Order placed successfully! The seller will contact you soon.",
+        cartEmptyMessage: "Your cart is empty",
         
         // Login/Register
         loginTitle: "Login",
@@ -285,6 +311,19 @@ const translations = {
         summerDesc: "Colores cálidos y brillantes",
         winterDesc: "Colores frescos y elegantes",
         
+        // Cart
+        cart: "Carrito",
+        addToCart: "Añadir al carrito",
+        removeFromCart: "Eliminar",
+        cartEmpty: "Carrito vacío",
+        total: "Total",
+        checkout: "Pagar",
+        quantity: "Cantidad",
+        addedToCart: "¡Añadido al carrito!",
+        removedFromCart: "¡Eliminado del carrito!",
+        checkoutSuccess: "¡Pedido realizado con éxito! El vendedor se pondrá en contacto contigo pronto.",
+        cartEmptyMessage: "Tu carrito está vacío",
+        
         // Login/Register
         loginTitle: "Iniciar Sesión",
         registerTitle: "Registrarse",
@@ -416,6 +455,19 @@ const translations = {
         winterTheme: "冬",
         summerDesc: "暖かく明るい色",
         winterDesc: "涼しく上品な色",
+        
+        // Cart
+        cart: "カート",
+        addToCart: "カートに追加",
+        removeFromCart: "削除",
+        cartEmpty: "カートは空です",
+        total: "合計",
+        checkout: "チェックアウト",
+        quantity: "数量",
+        addedToCart: "カートに追加されました！",
+        removedFromCart: "カートから削除されました！",
+        checkoutSuccess: "注文が完了しました！販売者がすぐに連絡します。",
+        cartEmptyMessage: "カートは空です",
         
         // Login/Register
         loginTitle: "ログイン",

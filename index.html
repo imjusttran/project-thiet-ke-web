@@ -19,6 +19,10 @@
             <div class="header-actions">
                 <button class="theme-toggle" id="themeToggle">🎨</button>
                 <button class="lang-toggle" id="langToggle">🌐</button>
+                <button class="cart-toggle" id="cartToggle">
+                    🛒
+                    <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+                </button>
                 <button class="btn-primary" id="loginBtn">Đăng nhập</button>
                 <button class="btn-secondary" id="registerBtn">Đăng ký</button>
                 <div class="user-menu" id="userMenu" style="display: none;">
@@ -88,28 +92,28 @@
     <!-- Login Modal -->
     <div class="modal" id="loginModal">
         <div class="modal-content">
-            <h2>Đăng nhập</h2>
+            <h2 data-i18n="loginTitle">Đăng nhập</h2>
             <form id="loginForm">
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Mật khẩu" required>
-                <button type="submit" class="btn-primary">Đăng nhập</button>
+                <input type="email" data-i18n="email" placeholder="Email" required>
+                <input type="password" data-i18n="password" placeholder="Mật khẩu" required>
+                <button type="submit" class="btn-primary" data-i18n="login">Đăng nhập</button>
             </form>
-            <button class="btn-secondary" onclick="closeModal('loginModal')">Hủy</button>
+            <button class="btn-secondary" onclick="closeModal('loginModal')" data-i18n="cancel">Hủy</button>
         </div>
     </div>
 
     <!-- Register Modal -->
     <div class="modal" id="registerModal">
         <div class="modal-content">
-            <h2>Đăng ký</h2>
+            <h2 data-i18n="registerTitle">Đăng ký</h2>
             <form id="registerForm">
-                <input type="text" placeholder="Tên đầy đủ" required>
-                <input type="email" placeholder="Email" required>
-                <input type="tel" placeholder="Số điện thoại" required>
-                <input type="password" placeholder="Mật khẩu" required>
-                <button type="submit" class="btn-primary">Đăng ký</button>
+                <input type="text" data-i18n="fullName" placeholder="Tên đầy đủ" required>
+                <input type="email" data-i18n="email" placeholder="Email" required>
+                <input type="tel" data-i18n="phone" placeholder="Số điện thoại" required>
+                <input type="password" data-i18n="password" placeholder="Mật khẩu" required>
+                <button type="submit" class="btn-primary" data-i18n="register">Đăng ký</button>
             </form>
-            <button class="btn-secondary" onclick="closeModal('registerModal')">Hủy</button>
+            <button class="btn-secondary" onclick="closeModal('registerModal')" data-i18n="cancel">Hủy</button>
         </div>
     </div>
 
@@ -146,6 +150,22 @@
                 <input type="text" id="chatInput" placeholder="Nhập tin nhắn...">
                 <button class="btn-primary" id="sendMessage">Gửi</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal" id="cartModal">
+        <div class="modal-content">
+            <h2 data-i18n="cart">Giỏ hàng</h2>
+            <div id="cartItems"></div>
+            <div class="cart-summary">
+                <div class="cart-total">
+                    <span data-i18n="total">Tổng cộng:</span>
+                    <span id="cartTotal">0 ₫</span>
+                </div>
+                <button class="btn-primary" id="checkoutBtn" data-i18n="checkout">Thanh toán</button>
+            </div>
+            <button class="btn-secondary" onclick="closeModal('cartModal')" data-i18n="close">Đóng</button>
         </div>
     </div>
 
