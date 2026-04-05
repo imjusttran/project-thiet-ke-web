@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chợ Online - Marketplace</title>
+    <title>Marketplace</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="container">
-            <div class="logo">Chợ Online</div>
+            <div class="logo">PJC Marketplace</div>
             <nav class="nav">
                 <a href="#" class="nav-link" data-page="home">Trang chủ</a>
                 <a href="#" class="nav-link" data-page="products">Sản phẩm</a>
-                <a href="#" class="nav-link" data-page="my-products">Sản phẩm của tôi</a>
                 <a href="#" class="nav-link" data-page="profile">Của tôi</a>
             </nav>
             <div class="header-actions">
                 <button class="theme-toggle" id="themeToggle">🎨</button>
+                <button class="lang-toggle" id="langToggle">🌐</button>
                 <button class="btn-primary" id="loginBtn">Đăng nhập</button>
                 <button class="btn-secondary" id="registerBtn">Đăng ký</button>
                 <div class="user-menu" id="userMenu" style="display: none;">
@@ -32,50 +32,56 @@
     <!-- Theme Selector Modal -->
     <div class="modal" id="themeModal">
         <div class="modal-content">
-            <h2>Chọn Theme</h2>
+            <h2 data-i18n="selectTheme">Chọn Theme</h2>
             <div class="theme-grid">
-                <div class="theme-option" data-theme="green">
-                    <div class="theme-preview">
-                        <div style="background: #A4CD01"></div>
-                        <div style="background: #E0D205"></div>
-                        <div style="background: #02754B"></div>
+                <div class="theme-option" data-theme="summer">
+                    <div class="theme-preview summer-preview">
+                        <div class="preview-icon">☀️</div>
+                        <div class="preview-gradient"></div>
                     </div>
-                    <p>Xanh Tươi</p>
+                    <h3 data-i18n="summerTheme">Mùa Hè</h3>
+                    <p data-i18n="summerDesc">Tươi sáng, ấm áp, năng động</p>
                 </div>
-                <div class="theme-option" data-theme="dark">
-                    <div class="theme-preview">
-                        <div style="background: #474747"></div>
-                        <div style="background: #333333"></div>
-                        <div style="background: #FD105E"></div>
+                <div class="theme-option" data-theme="winter">
+                    <div class="theme-preview winter-preview">
+                        <div class="preview-icon">❄️</div>
+                        <div class="preview-gradient"></div>
                     </div>
-                    <p>Tối Hiện Đại</p>
-                </div>
-                <div class="theme-option" data-theme="purple">
-                    <div class="theme-preview">
-                        <div style="background: #EAEFFE"></div>
-                        <div style="background: #9787F3"></div>
-                        <div style="background: #2D274B"></div>
-                    </div>
-                    <p>Tím Nhẹ Nhàng</p>
-                </div>
-                <div class="theme-option" data-theme="pastel">
-                    <div class="theme-preview">
-                        <div style="background: #F6F3ED"></div>
-                        <div style="background: #C2CBD3"></div>
-                        <div style="background: #E281B1"></div>
-                    </div>
-                    <p>Pastel Dịu</p>
-                </div>
-                <div class="theme-option" data-theme="warm">
-                    <div class="theme-preview">
-                        <div style="background: #F8DCD3"></div>
-                        <div style="background: #82AAF2"></div>
-                        <div style="background: #FB8A4C"></div>
-                    </div>
-                    <p>Ấm Áp</p>
+                    <h3 data-i18n="winterTheme">Mùa Đông</h3>
+                    <p data-i18n="winterDesc">Lạnh lẽo, thanh thoát, tinh tế</p>
                 </div>
             </div>
-            <button class="btn-secondary" onclick="closeModal('themeModal')">Đóng</button>
+            <button class="btn-secondary" onclick="closeModal('themeModal')" data-i18n="close">Đóng</button>
+        </div>
+    </div>
+
+    <!-- Language Selector Modal -->
+    <div class="modal" id="langModal">
+        <div class="modal-content">
+            <h2 data-i18n="selectLanguage">Chọn Ngôn Ngữ</h2>
+            <div class="lang-grid">
+                <div class="lang-option" data-lang="vi">
+                    <div class="lang-flag">🇻🇳</div>
+                    <h3>Tiếng Việt</h3>
+                    <p>Vietnamese</p>
+                </div>
+                <div class="lang-option" data-lang="en">
+                    <div class="lang-flag">🇬🇧</div>
+                    <h3>English</h3>
+                    <p>Tiếng Anh</p>
+                </div>
+                <div class="lang-option" data-lang="es">
+                    <div class="lang-flag">🇪🇸</div>
+                    <h3>Español</h3>
+                    <p>Tiếng Tây Ban Nha</p>
+                </div>
+                <div class="lang-option" data-lang="ja">
+                    <div class="lang-flag">🇯🇵</div>
+                    <h3>日本語</h3>
+                    <p>Tiếng Nhật</p>
+                </div>
+            </div>
+            <button class="btn-secondary" onclick="closeModal('langModal')" data-i18n="close">Đóng</button>
         </div>
     </div>
 
@@ -157,7 +163,7 @@
                 <div class="home-section">
                     <h2>Giới thiệu</h2>
                     <div id="aboutContent" class="editable-content">
-                        <p>Chợ Online là nền tảng mua bán trực tuyến hiện đại, kết nối người mua và người bán một cách nhanh chóng và tiện lợi.</p>
+                        <p>PJC Marketplace là nền tảng mua bán trực tuyến hiện đại, kết nối người mua và người bán một cách nhanh chóng và tiện lợi.</p>
                         <p>Với giao diện thân thiện và dễ sử dụng, bạn có thể dễ dàng đăng bán sản phẩm hoặc tìm kiếm những món đồ yêu thích.</p>
                     </div>
                     <button class="btn-secondary edit-btn" id="editAboutBtn" style="display: none;">Chỉnh sửa</button>
@@ -169,11 +175,11 @@
                     <div id="contactContent" class="contact-info">
                         <div class="contact-item">
                             <span class="contact-label">📧 Email:</span>
-                            <span id="contactEmail">contact@choonline.vn</span>
+                            <span id="contactEmail">sangtraangg@gmail.vn</span>
                         </div>
                         <div class="contact-item">
                             <span class="contact-label">📱 Điện thoại:</span>
-                            <span id="contactPhone">0123 456 789</span>
+                            <span id="contactPhone">084 *** ****</span>
                         </div>
                         <div class="contact-item">
                             <span class="contact-label">📍 Địa chỉ:</span>
@@ -230,15 +236,6 @@
             <div id="noResults" style="display: none; text-align: center; padding: 3rem; font-size: 1.2rem; color: var(--color-text-light);">
                 Không tìm thấy sản phẩm nào 😔
             </div>
-        </div>
-
-        <!-- My Products Page -->
-        <div class="page" id="myProductsPage" style="display: none;">
-            <div class="page-header">
-                <h1>Sản phẩm của tôi</h1>
-                <button class="btn-primary" id="addProductBtn2">+ Đăng sản phẩm</button>
-            </div>
-            <div class="products-grid" id="myProductsGrid"></div>
         </div>
 
         <!-- Profile Page -->
@@ -321,6 +318,20 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- My Products Section -->
+                    <div class="profile-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                            <h2 style="margin-bottom: 0;">Sản phẩm của tôi</h2>
+                            <button class="btn-primary" id="addProductBtn2">+ Đăng sản phẩm</button>
+                        </div>
+                        <div class="products-grid" id="myProductsGrid"></div>
+                        <div id="noProductsMessage" style="display: none; text-align: center; padding: 3rem; color: var(--color-text-light);">
+                            <p style="font-size: 3rem; margin-bottom: 1rem;">📦</p>
+                            <p style="font-size: 1.2rem;">Bạn chưa có sản phẩm nào</p>
+                            <p>Hãy đăng sản phẩm đầu tiên của bạn!</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -352,6 +363,7 @@
         </div>
     </div>
 
+    <script src="translations.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
