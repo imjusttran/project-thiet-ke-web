@@ -5,10 +5,10 @@ let db = {
     chats: [],
     cart: [], // Shopping cart
     siteSettings: {
-        ownerEmail: 'owner@example.com', // Email của owner
+        ownerEmail: 'thanhphamtien191107@gmail.com', // Email của owner
         aboutText: 'Chợ Online là nền tảng mua bán trực tuyến hiện đại, kết nối người mua và người bán một cách nhanh chóng và tiện lợi.\n\nVới giao diện thân thiện và dễ sử dụng, bạn có thể dễ dàng đăng bán sản phẩm hoặc tìm kiếm những món đồ yêu thích.',
         contactEmail: 'contact@choonline.vn',
-        contactPhone: '0123 456 789',
+        contactPhone: '0396 238 323',
         contactAddress: 'Hà Nội, Việt Nam'
     }
 };
